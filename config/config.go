@@ -25,6 +25,6 @@ func ReadConfig() (*Config, error) {
 		fmt.Println("error unmarshaling config.json!: ", err)
 		return nil, err
 	}
-	fmt.Printf("config succesfully read! // token: %s // prefix: %s\n", cfg.Token, cfg.BotPrefix)
+	fmt.Printf("config succesfully read! // prefix: %s\n", cfg.BotPrefix)
 	return &cfg, nil
 }
