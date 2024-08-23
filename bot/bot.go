@@ -2,9 +2,6 @@ package bot
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ralqadri/unagi/config"
@@ -16,44 +13,32 @@ var (
 	cfg *config.Config
 )
 
-func Start() {
+func Start() (*discordgo.Session, error) {
 	var err error
 	cfg, err = config.ReadConfig()
 
 	if err != nil {
 		fmt.Println("failed starting & reading config!: ", err)
-		return 
+		return nil, err
 	}
 
 	// apparently "Bot " is a required prefix for this token type 
-	dg, err = discordgo.New("Bot " + cfg.Token)
+	dg, err := discordgo.New("Bot " + cfg.Token)
 	if err != nil {
 		fmt.Println("failed creating discord bot session!: ", err)
-		return
+		return nil, err
 	}
-
-	// user, err := dg.User("@me")
-	// if err != nil {
-	// 	fmt.Println("error obtaining current user: ", err)
-	// }
-
-	// BotId = user.ID
 
 	dg.AddHandler(messageCreate)
 
 	err = dg.Open()
 	if err != nil {
 		fmt.Println("error opening connection to discord: ", err)
-		return
+		return nil, err
 	}
 
 	fmt.Println("bot is now connected! ctrl+c to exit")
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	<-sc
-
-	// Cleanly close down the Discord session.
-	dg.Close()
+	return dg, nil
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
