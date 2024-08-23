@@ -2,6 +2,9 @@ package bot
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/ralqadri/unagi/config"
@@ -9,7 +12,7 @@ import (
 
 var (
 	BotId string
-	goBot *discordgo.Session
+	dg *discordgo.Session
 	cfg *config.Config
 )
 
@@ -22,38 +25,45 @@ func Start() {
 		return 
 	}
 
-	goBot, err = discordgo.New("bot " + cfg.Token)
+	// apparently "Bot " is a required prefix for this token type 
+	dg, err = discordgo.New("Bot " + cfg.Token)
 	if err != nil {
 		fmt.Println("failed creating discord bot session!: ", err)
 		return
 	}
 
-	user, err := goBot.User("@me")
-	if err != nil {
-		fmt.Println("error obtaining current user: ", err)
-	}
+	// user, err := dg.User("@me")
+	// if err != nil {
+	// 	fmt.Println("error obtaining current user: ", err)
+	// }
 
-	BotId = user.ID
+	// BotId = user.ID
 
-	goBot.AddHandler(messageHandler)
+	dg.AddHandler(messageCreate)
 
-	err = goBot.Open()
+	err = dg.Open()
 	if err != nil {
 		fmt.Println("error opening connection to discord: ", err)
 		return
 	}
 
-	fmt.Println("bot is now connected!")
+	fmt.Println("bot is now connected! ctrl+c to exit")
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-sc
+
+	// Cleanly close down the Discord session.
+	dg.Close()
 }
 
-func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
+func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// ignore messages from bot itself/self responses
-	if m.Author.ID == BotId {
+	if m.Author.ID == s.State.User.ID {
 		return
 	}
 
 	prefix := cfg.BotPrefix
 	if m.Content == prefix + "ping" {
-		_, _ = s.ChannelMessageSend(m.ChannelID, "pong!")
+		s.ChannelMessageSend(m.ChannelID, "pong!")
 	}
 }
