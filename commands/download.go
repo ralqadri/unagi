@@ -16,6 +16,12 @@ type RequestBody struct {
 	Url		string	`json:"url"`
 }
 
+type ResponseBody struct {
+	Status 		string	`json:"status"`
+	Url			string	`json:"url"`
+	Text		string	`json:"text"`
+}
+
 // https://www.practical-go-lessons.com/post/go-how-to-send-post-http-requests-with-a-json-body-cbhvuqa220ds70kp2lkg
 
 func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string) {
@@ -60,12 +66,27 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 		defer res.Body.Close()
 
 		// read body
-		resBody, err := io.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "error reading response body!: " + err.Error())
 			log.Fatalf("error reading response body!: %s", err)
 		}
-		s.ChannelMessageSend(m.ChannelID, string(resBody))
-		log.Printf("resBody: %s", string(resBody))
+		
+		log.Printf("resBody: %s", string(body))
+
+		var resBody ResponseBody
+		err = json.Unmarshal(body, &resBody)
+		if err != nil {
+			s.ChannelMessageSend(m.ChannelID, "error unmarshaling response body!: " + err.Error())
+			log.Fatalf("error unmarshaling response body!: %s", err)
+		}
+
+		log.Printf("resBody: %s", resBody)
+
+		if resBody.Status == "redirect" {
+			s.ChannelMessageSend(m.ChannelID, resBody.Url)
+		} else {
+			s.ChannelMessageSend(m.ChannelID, resBody.Text)
+		}
 	}
 }
