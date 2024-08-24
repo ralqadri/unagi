@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/ralqadri/unagi/commands"
 	"github.com/ralqadri/unagi/config"
 )
 
@@ -48,7 +49,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	prefix := cfg.BotPrefix
-	if m.Content == prefix + "ping" {
-		s.ChannelMessageSend(m.ChannelID, "pong!")
-	}
+	content := m.Content
+
+	// command: ping
+	commands.HandlePingCommand(s, m, prefix, content)
+
+	// command: echo
+	commands.HandleEchoCommand(s, m, prefix, content)
 }
