@@ -18,6 +18,7 @@ type ServerInfo struct {
 
 // https://stackoverflow.com/posts/68018927/revisions
 
+// TODO: change the errors from fmt.println to log.fatalf 
 func HandleServerInfoCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string) {
 	if strings.HasPrefix(content, prefix + "info") {
 		client := http.Client{}
@@ -51,6 +52,7 @@ func HandleServerInfoCommand(s *discordgo.Session, m *discordgo.MessageCreate, p
 			fmt.Println("error unmarshaling response body!: ", err)
 			return
 		}
+		fmt.Println("serverInfo: ", serverInfo)
 		
 		wrappedBodyMessage := fmt.Sprintf("```json\n%s\n```", string(body))
 		
