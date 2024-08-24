@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -9,14 +10,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var (
-	cobaltApiUrl = "api.cobalt.tools"
-)
+type Info struct {
+	Name		string 	`json:"name"`
+	StartTime	string 	`json:"startTime"`
+}
+
 
 // https://stackoverflow.com/posts/68018927/revisions
 
-func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string) {
-	if strings.HasPrefix(content, prefix + "dl") {
+func HandleServerInfoCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string) {
+	if strings.HasPrefix(content, prefix + "info") {
 		client := http.Client{}
 		req, err := http.NewRequest("GET", "https://api.cobalt.tools/api/serverInfo", nil)
 		if err != nil {
@@ -41,10 +44,17 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			fmt.Println("error reading response body!: ", err)
 			return
 		}
+
+		var serverInfo Info
+		err = json.Unmarshal(body, &serverInfo)
+		if err != nil {
+			fmt.Println("error unmarshaling response body!: ", err)
+			return
+		}
 		
-		wrappedBody := fmt.Sprintf("```json\n%s\n```", string(body))
+		wrappedBodyMessage := fmt.Sprintf("```json\n%s\n```", string(body))
 		
-		s.ChannelMessageSend(m.ChannelID, wrappedBody)
+		s.ChannelMessageSend(m.ChannelID, wrappedBodyMessage)
 		fmt.Println("body: ", string(body))
 	}
 }
