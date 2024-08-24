@@ -27,6 +27,17 @@ type ResponseBody struct {
 
 // https://www.practical-go-lessons.com/post/go-how-to-send-post-http-requests-with-a-json-body-cbhvuqa220ds70kp2lkg
 
+func sanitizeFileName(filename string) string {
+	ext := path.Ext(filename)
+	if ext == "" {
+		return filename
+	}
+
+	// TODO: continue removing query parameters
+
+	// return ogName + ext // return ogName with the extension only
+}
+
 func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string) {
 	if strings.HasPrefix(content, prefix + "dl") {
 		
@@ -89,43 +100,37 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 		if resBody.Status == "success" || resBody.Status == "redirect" || resBody.Status == "stream" {
 			// grab url here later and fetch it
 			// maybe i should probably move this to another file but whatever
-			s.ChannelMessageSend(m.ChannelID, resBody.Url)
+			// s.ChannelMessageSend(m.ChannelID, resBody.Url)
 
-			// check download directory
-			downloadsDir := "../downloads"
-			err := os.MkdirAll(downloadsDir, os.ModePerm)
+			outRes, err := http.Get(resBody.Url)
 			if err != nil {
-				log.Fatalf("error creating downloads directory!: %s", err)
+				s.ChannelMessageSend(m.ChannelID, "error fetching file!: " + err.Error())
+				log.Fatalf("error fetching file!: %s", err)
 			}
+			defer outRes.Body.Close()
 
-			// creating the filepath
-			filename := path.Base(resBody.Url) // get the filename from the url
-			filepath := fmt.Sprintf("%s/%s", downloadsDir, filename)
-			fmt.Println("filename: ", filename)
-			fmt.Println("filepath: ", filepath)
+			filename := path.Base(resBody.Url)
+			if filename == "" {
+				filename = "file.mp4"
+			}
+			filename = sanitizeFileName(filename)
+
+			filepath := fmt.Sprintf("%s/%s", "./downloads/", filename)
 			out, err := os.Create(filepath)
 			if err != nil {
-				log.Fatalf("error creating filepath!: %s", err)
+				s.ChannelMessageSend(m.ChannelID, "error creating file!: " + err.Error())
+				log.Fatalf("error creating file!: %s", err)
 			}
 			defer out.Close()
 
-			// fetching the file
-			fmt.Println("fetching file ...", resBody.Url)
-
-			fileRes, err := http.Get(resBody.Url)
+			_, err = io.Copy(out, outRes.Body)
 			if err != nil {
-				log.Fatalf("error fetching file response!: %s", err)
-			}
-			defer fileRes.Body.Close()
-
-			_, err = io.Copy(out, fileRes.Body)
-			if err != nil {
-				log.Fatalf("error copying file to disk!: %s", err)
+				s.ChannelMessageSend(m.ChannelID, "error copying file!: " + err.Error())
+				log.Fatalf("error copying file!: %s", err)
 			}
 
-			log.Printf("file downloaded!: %s", filename)
-			s.ChannelMessageSend(m.ChannelID, "file downloaded!")
-			
+			log.Printf("file downloaded!: (%s) // filepath: %s", filename, filepath)
+
 		} else {
 			s.ChannelMessageSend(m.ChannelID, resBody.Text)
 		}
