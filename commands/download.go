@@ -3,9 +3,12 @@ package commands
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -71,7 +74,7 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			s.ChannelMessageSend(m.ChannelID, "error reading response body!: " + err.Error())
 			log.Fatalf("error reading response body!: %s", err)
 		}
-		
+
 		log.Printf("resBody: %s", string(body))
 
 		var resBody ResponseBody
@@ -83,8 +86,46 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 
 		log.Printf("resBody: %s", resBody)
 
-		if resBody.Status == "redirect" {
+		if resBody.Status == "success" || resBody.Status == "redirect" || resBody.Status == "stream" {
+			// grab url here later and fetch it
+			// maybe i should probably move this to another file but whatever
 			s.ChannelMessageSend(m.ChannelID, resBody.Url)
+
+			// check download directory
+			downloadsDir := "../downloads"
+			err := os.MkdirAll(downloadsDir, os.ModePerm)
+			if err != nil {
+				log.Fatalf("error creating downloads directory!: %s", err)
+			}
+
+			// creating the filepath
+			filename := path.Base(resBody.Url) // get the filename from the url
+			filepath := fmt.Sprintf("%s/%s", downloadsDir, filename)
+			fmt.Println("filename: ", filename)
+			fmt.Println("filepath: ", filepath)
+			out, err := os.Create(filepath)
+			if err != nil {
+				log.Fatalf("error creating filepath!: %s", err)
+			}
+			defer out.Close()
+
+			// fetching the file
+			fmt.Println("fetching file ...", resBody.Url)
+
+			fileRes, err := http.Get(resBody.Url)
+			if err != nil {
+				log.Fatalf("error fetching file response!: %s", err)
+			}
+			defer fileRes.Body.Close()
+
+			_, err = io.Copy(out, fileRes.Body)
+			if err != nil {
+				log.Fatalf("error copying file to disk!: %s", err)
+			}
+
+			log.Printf("file downloaded!: %s", filename)
+			s.ChannelMessageSend(m.ChannelID, "file downloaded!")
+			
 		} else {
 			s.ChannelMessageSend(m.ChannelID, resBody.Text)
 		}

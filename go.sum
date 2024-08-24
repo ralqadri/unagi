@@ -1,3 +1,5 @@
+github.com/GiterLab/urllib v1.0.3 h1:TSln/npLDqx7xPM+BQ4aS+pgukAXda7IXQMOtELANOg=
+github.com/GiterLab/urllib v1.0.3/go.mod h1:ck4XYn2TWcXJlfxXJ+hvLSX0iLLvWpCJPT+tp4TUzDM=
 github.com/bwmarrin/discordgo v0.28.1 h1:gXsuo2GBO7NbR6uqmrrBDplPUx2T3nzu775q/Rd1aG4=
 github.com/bwmarrin/discordgo v0.28.1/go.mod h1:NJZpH+1AfhIcyQsPeuBKsUtYrRnjkyu0kIVMCHkZtRY=
 github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=
