@@ -56,4 +56,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// command: echo
 	commands.HandleEchoCommand(s, m, prefix, content)
+
+	// command: dl
+	commands.HandleDownloadCommand(s, m, prefix, content)
 }
