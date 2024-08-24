@@ -21,5 +21,5 @@ func main() {
 	<-sc
 	dg.Close()
 
-	fmt.Println("bot is shutting down...")
+	fmt.Println(" bot is shutting down...")
 }
