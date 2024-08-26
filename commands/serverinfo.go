@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 
@@ -18,7 +19,6 @@ type ServerInfo struct {
 
 // https://stackoverflow.com/posts/68018927/revisions
 
-// TODO: change the errors from fmt.println to log.fatalf 
 func HandleServerInfoCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string) {
 	if strings.HasPrefix(content, prefix + "info") {
 		client := http.Client{}
@@ -36,21 +36,20 @@ func HandleServerInfoCommand(s *discordgo.Session, m *discordgo.MessageCreate, p
 		res, err := client.Do(req)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "error fetching cobalt api!: " + err.Error())
-			fmt.Println("error fetching cobalt api!: ", err)
+			log.Fatalf("error fetching cobalt api!: %s", err)
 		}
 
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "error reading response body!: " + err.Error())
-			fmt.Println("error reading response body!: ", err)
-			return
+			log.Fatalf("error reading response body!: %s", err)
 		}
 
 		var serverInfo ServerInfo
 		err = json.Unmarshal(body, &serverInfo)
 		if err != nil {
-			fmt.Println("error unmarshaling response body!: ", err)
-			return
+			s.ChannelMessageSend(m.ChannelID, "error unmarshaling response body!: " + err.Error())
+			log.Fatalf("error unmarshaling response body!: %s", err)
 		}
 		fmt.Println("serverInfo: ", serverInfo)
 		

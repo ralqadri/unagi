@@ -94,7 +94,6 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			}
 			defer outRes.Body.Close()
 
-			// TODO: this shit
 			filename := utils.SanitizeFileName(path.Base(resBody.Url))
 			fmt.Printf("returned filename: %s\n", filename)
 
@@ -114,8 +113,9 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			log.Printf("file downloaded!: (%s) // filepath: %s", filename, filepath)
 			defer out.Close()
 
-			HandleSendFileCommand(s, m, prefix, content, filepath, filename)
+			utils.SendFileToChannel(s, m, prefix, content, filepath, filename)
 
+			// TODO: add job to delete file from local dir after finish sending
 		} else {
 			s.ChannelMessageSend(m.ChannelID, resBody.Text)
 		}
