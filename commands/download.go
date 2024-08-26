@@ -8,10 +8,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/ralqadri/unagi/utils"
 )
 
 type RequestBody struct {
@@ -25,16 +27,6 @@ type ResponseBody struct {
 }
 
 // https://www.practical-go-lessons.com/post/go-how-to-send-post-http-requests-with-a-json-body-cbhvuqa220ds70kp2lkg
-
-// TODO: just fuckin move this to tools or something
-// func sanitizeFileName(filename string) string {
-// 	ext := path.Ext(filename)
-// 	if ext == "" {
-// 		return filename
-// 	}
-
-// 	// return ogName + ext // return ogName with the extension only
-// }
 
 func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string) {
 	if strings.HasPrefix(content, prefix + "dl") {
@@ -94,7 +86,7 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 		}
 
 		if resBody.Status == "success" || resBody.Status == "redirect" || resBody.Status == "stream" {
-
+			// TODO: file download failsafes
 			outRes, err := http.Get(resBody.Url)
 			if err != nil {
 				s.ChannelMessageSend(m.ChannelID, "error fetching file!: " + err.Error())
@@ -103,9 +95,8 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			defer outRes.Body.Close()
 
 			// TODO: this shit
-			// filename = sanitizeFileName(filename)
-
-			filename := "file.mp4"
+			filename := utils.SanitizeFileName(path.Base(resBody.Url))
+			fmt.Printf("returned filename: %s\n", filename)
 
 			filepath := fmt.Sprintf("%s/%s", "./downloads", filename)
 			out, err := os.Create(filepath)
@@ -123,7 +114,7 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			log.Printf("file downloaded!: (%s) // filepath: %s", filename, filepath)
 			defer out.Close()
 
-			HandleSendFileCommand(s, m, prefix, content, filepath)
+			HandleSendFileCommand(s, m, prefix, content, filepath, filename)
 
 		} else {
 			s.ChannelMessageSend(m.ChannelID, resBody.Text)

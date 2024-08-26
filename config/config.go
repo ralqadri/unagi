@@ -11,6 +11,7 @@ type Config struct {
 	BotPrefix	string	`json:"botPrefix"`
 }
 
+// TODO: store these in env instead
 func ReadConfig() (*Config, error) {
 	fmt.Println("reading config.json ...")
 	data, err := os.ReadFile("config/config.json")
