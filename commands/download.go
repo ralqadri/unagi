@@ -94,8 +94,14 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			}
 			defer outRes.Body.Close()
 
-			filename := utils.SanitizeFileName(path.Base(resBody.Url))
-			log.Printf("returned filename: %s\n", filename)
+			filename := ""
+			if resBody.Status == "stream" {
+				// TODO: a better way to fetch the title of the stream (and potentially for stuff that are also "success" and "redirect" responses)
+				filename = "stream.mp4"
+			} else {
+				filename = utils.SanitizeFileName(path.Base(resBody.Url))
+				log.Printf("returned filename: %s\n", filename)
+			}
 
 			filepath := fmt.Sprintf("%s/%s", "./downloads", filename)
 			out, err := os.Create(filepath)
@@ -110,12 +116,24 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 				log.Fatalf("error copying file!: %s", err)
 			}
 
-			log.Printf("file downloaded!: (%s) // filepath: %s", filename, filepath)
+			log.Printf("file downloaded!: %s // filepath: %s", filename, filepath)
+			
+			fileInfo, err :=  os.Stat(filepath)
+			if err != nil {
+				s.ChannelMessageSend(m.ChannelID, "error getting file info!: " + err.Error())
+				log.Fatalf("error getting file info!: %s", err)
+			}
+
 			defer out.Close()
 
-			utils.SendFileToChannel(s, m, prefix, content, filepath, filename)
+			if fileInfo.Size() > 26214400 {
+				s.ChannelMessageSend(m.ChannelID, "file is too big to send! (max 25MB)")
+				log.Fatalf("file is too big to send! (max 25MB): %s", filepath)
+			} else {
+				utils.SendFileToChannel(s, m, prefix, content, filepath, filename)
+			}
+			utils.CleanUpFile(filepath)
 
-			// TODO: add job to delete file from local dir after finish sending
 		} else {
 			s.ChannelMessageSend(m.ChannelID, resBody.Text)
 		}

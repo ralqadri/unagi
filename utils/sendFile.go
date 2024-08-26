@@ -27,11 +27,5 @@ func SendFileToChannel(s *discordgo.Session, m *discordgo.MessageCreate, prefix 
 		log.Printf("successfully sent file: %s\n", filepath)
 	}
 
-	err = os.Remove(filepath)
-	if err != nil {
-		s.ChannelMessageSend(m.ChannelID, "error deleting file!: " + err.Error())
-		log.Fatalf("error deleting file!: %s", err)
-	} else {
-		log.Printf("successfully deleted file: %s\n", filepath)	
-	}
+
 }
