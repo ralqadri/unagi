@@ -31,7 +31,7 @@ type ResponseBody struct {
 func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string) {
 	if strings.HasPrefix(content, prefix + "dl") {
 		downloadLink := strings.Trim(content, prefix + "dl")
-		log.Printf("\nstarting to download: %s", downloadLink)
+		log.Printf("starting to download: %s", downloadLink)
 
 		// preparing the json for the request body
 		reqBody := RequestBody{

@@ -38,7 +38,7 @@ func Start() (*discordgo.Session, error) {
 		return nil, err
 	}
 
-	fmt.Println("bot is now connected! ctrl+c to exit")
+	fmt.Println("bot is now connected! ctrl+c to exit\n")
 	return dg, nil
 }
 
