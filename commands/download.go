@@ -119,33 +119,16 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 				log.Printf("error copying file!: %s", err)
 				return
 			}
-
 			log.Printf("file downloaded!: %s // filepath: %s", filename, filepath)
-			
-			fileInfo, err :=  os.Stat(filepath)
-			if err != nil {
-				s.ChannelMessageSend(m.ChannelID, "error getting file info!: " + err.Error())
-				log.Printf("error getting file info!: %s", err)
-				return
-			}
-
 			defer out.Close()
 
-			if fileInfo.Size() > 26214400 {
-				s.ChannelMessageSend(m.ChannelID, "file is too big to send! (max 25MB)")
-				log.Printf("file is too big to send! (max 25MB): %s", filepath)
-				
-			} else {
-				utils.SendFileToChannel(s, m, prefix, content, filepath, filename)
-			}
-
+			utils.SendFileToChannel(s, m, prefix, content, filepath, filename)
 			utils.CleanUpFile(filepath)
-			return
-
 		} else {
 			log.Printf("cobalt failed to process the link: %s", resBody.Text)
 			s.ChannelMessageSend(m.ChannelID, resBody.Text)
 			return
 		}
+
 	}
 }
