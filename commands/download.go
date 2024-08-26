@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"strings"
 	"time"
 
@@ -27,16 +26,16 @@ type ResponseBody struct {
 
 // https://www.practical-go-lessons.com/post/go-how-to-send-post-http-requests-with-a-json-body-cbhvuqa220ds70kp2lkg
 
-func sanitizeFileName(filename string) string {
-	ext := path.Ext(filename)
-	if ext == "" {
-		return filename
-	}
+// func sanitizeFileName(filename string) string {
+// 	ext := path.Ext(filename)
+// 	if ext == "" {
+// 		return filename
+// 	}
 
-	// TODO: continue removing query parameters
+// 	// TODO: continue removing query parameters
 
-	// return ogName + ext // return ogName with the extension only
-}
+// 	// return ogName + ext // return ogName with the extension only
+// }
 
 func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string) {
 	if strings.HasPrefix(content, prefix + "dl") {
@@ -74,7 +73,7 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			s.ChannelMessageSend(m.ChannelID, "error fetching cobalt api!: " + err.Error())
 			log.Fatalf("error fetching cobalt api!: %s", err)
 		}
-		log.Printf("status code: %d", res.StatusCode)
+		// log.Printf("status code: %d", res.StatusCode)
 
 		// close body to free resources; defer will execute this at the end of this current func
 		defer res.Body.Close()
@@ -95,7 +94,7 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			log.Fatalf("error unmarshaling response body!: %s", err)
 		}
 
-		log.Printf("resBody: %s", resBody)
+		// log.Printf("resBody: %s", resBody)
 
 		if resBody.Status == "success" || resBody.Status == "redirect" || resBody.Status == "stream" {
 			// grab url here later and fetch it
@@ -109,19 +108,23 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			}
 			defer outRes.Body.Close()
 
-			filename := path.Base(resBody.Url)
-			if filename == "" {
-				filename = "file.mp4"
-			}
-			filename = sanitizeFileName(filename)
+			// TODO: this shit
+			// filename := path.Base(resBody.Url)
+			// if filename == "" {
+			// 	filename = "file.mp4"
+			// }
+			
+			// TODO: this shit
+			// filename = sanitizeFileName(filename)
 
-			filepath := fmt.Sprintf("%s/%s", "./downloads/", filename)
+			filename := "file.mp4"
+
+			filepath := fmt.Sprintf("%s/%s", "./downloads", filename)
 			out, err := os.Create(filepath)
 			if err != nil {
 				s.ChannelMessageSend(m.ChannelID, "error creating file!: " + err.Error())
 				log.Fatalf("error creating file!: %s", err)
 			}
-			defer out.Close()
 
 			_, err = io.Copy(out, outRes.Body)
 			if err != nil {
@@ -130,6 +133,9 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			}
 
 			log.Printf("file downloaded!: (%s) // filepath: %s", filename, filepath)
+			defer out.Close()
+
+			HandleSendFileCommand(s, m, prefix, content, filepath)
 
 		} else {
 			s.ChannelMessageSend(m.ChannelID, resBody.Text)
