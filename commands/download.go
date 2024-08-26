@@ -30,8 +30,6 @@ type ResponseBody struct {
 
 func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string) {
 	if strings.HasPrefix(content, prefix + "dl") {
-		
-		// getting the download link from the message content
 		downloadLink := strings.Trim(content, prefix + "dl")
 		log.Printf("\nstarting to download: %s", downloadLink)
 
@@ -40,16 +38,19 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			Url: downloadLink,
 		}
 
-		marshalled, err := json.Marshal(reqBody)
+		marshaled, err := json.Marshal(reqBody)
 		if err != nil {
-			log.Fatalf("impossible to marshall request body!: %s", err)
+			s.ChannelMessageSend(m.ChannelID, "impossible to marshal request body!: " + err.Error())
+			log.Printf("impossible to marshal request body!: %s", err)
+			return
 		}
 
 		// preparing request body for the POST request
-		req, err := http.NewRequest("POST", "https://api.cobalt.tools/api/json", bytes.NewReader(marshalled))
+		req, err := http.NewRequest("POST", "https://api.cobalt.tools/api/json", bytes.NewReader(marshaled))
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "error creating request!: " + err.Error())
-			log.Fatalf("can't build request!: %s", err)
+			log.Printf("can't build request!: %s", err)
+			return
 		}
 
 		req.Header = http.Header{
@@ -62,18 +63,17 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 		res, err := client.Do(req)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "error fetching cobalt api!: " + err.Error())
-			log.Fatalf("error fetching cobalt api!: %s", err)
+			log.Printf("error fetching cobalt api!: %s", err)
+			return
 		}
-		// log.Printf("status code: %d", res.StatusCode)
-
-		// close body to free resources; defer will execute this at the end of this current func
 		defer res.Body.Close()
 
 		// read body
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "error reading response body!: " + err.Error())
-			log.Fatalf("error reading response body!: %s", err)
+			log.Printf("error reading response body!: %s", err)
+			return
 		}
 
 		log.Printf("resBody: %s", string(body))
@@ -82,7 +82,8 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 		err = json.Unmarshal(body, &resBody)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "error unmarshaling response body!: " + err.Error())
-			log.Fatalf("error unmarshaling response body!: %s", err)
+			log.Printf("error unmarshaling response body!: %s", err)
+			return
 		}
 
 		if resBody.Status == "success" || resBody.Status == "redirect" || resBody.Status == "stream" {
@@ -90,7 +91,8 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			outRes, err := http.Get(resBody.Url)
 			if err != nil {
 				s.ChannelMessageSend(m.ChannelID, "error fetching file!: " + err.Error())
-				log.Fatalf("error fetching file!: %s", err)
+				log.Printf("error fetching file!: %s", err)
+				return
 			}
 			defer outRes.Body.Close()
 
@@ -107,13 +109,15 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			out, err := os.Create(filepath)
 			if err != nil {
 				s.ChannelMessageSend(m.ChannelID, "error creating file!: " + err.Error())
-				log.Fatalf("error creating file!: %s", err)
+				log.Printf("error creating file!: %s", err)
+				return
 			}
 
 			_, err = io.Copy(out, outRes.Body)
 			if err != nil {
 				s.ChannelMessageSend(m.ChannelID, "error copying file!: " + err.Error())
-				log.Fatalf("error copying file!: %s", err)
+				log.Printf("error copying file!: %s", err)
+				return
 			}
 
 			log.Printf("file downloaded!: %s // filepath: %s", filename, filepath)
@@ -121,21 +125,27 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			fileInfo, err :=  os.Stat(filepath)
 			if err != nil {
 				s.ChannelMessageSend(m.ChannelID, "error getting file info!: " + err.Error())
-				log.Fatalf("error getting file info!: %s", err)
+				log.Printf("error getting file info!: %s", err)
+				return
 			}
 
 			defer out.Close()
 
 			if fileInfo.Size() > 26214400 {
 				s.ChannelMessageSend(m.ChannelID, "file is too big to send! (max 25MB)")
-				log.Fatalf("file is too big to send! (max 25MB): %s", filepath)
+				log.Printf("file is too big to send! (max 25MB): %s", filepath)
+				
 			} else {
 				utils.SendFileToChannel(s, m, prefix, content, filepath, filename)
 			}
+
 			utils.CleanUpFile(filepath)
+			return
 
 		} else {
+			log.Printf("cobalt failed to process the link: %s", resBody.Text)
 			s.ChannelMessageSend(m.ChannelID, resBody.Text)
+			return
 		}
 	}
 }

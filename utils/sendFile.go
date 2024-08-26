@@ -15,14 +15,16 @@ func SendFileToChannel(s *discordgo.Session, m *discordgo.MessageCreate, prefix 
 	
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "error opening file!: " + err.Error())
-		log.Fatalf("error opening file!: %s", err)
+		log.Printf("error opening file!: %s", err)
+		return
 	}
 	defer file.Close()
 	
 	_, err = s.ChannelFileSend(m.ChannelID, filename, file)
 	if err != nil {
 		s.ChannelMessageSend(m.ChannelID, "error sending file!: " + err.Error())
-		log.Fatalf("error sending file!: %s", err)
+		log.Printf("error sending file!: %s", err)
+		return
 	} else {
 		log.Printf("successfully sent file: %s\n", filepath)
 	}

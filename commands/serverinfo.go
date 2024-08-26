@@ -36,20 +36,23 @@ func HandleServerInfoCommand(s *discordgo.Session, m *discordgo.MessageCreate, p
 		res, err := client.Do(req)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "error fetching cobalt api!: " + err.Error())
-			log.Fatalf("error fetching cobalt api!: %s", err)
+			log.Printf("error fetching cobalt api!: %s", err)
+			return
 		}
 
 		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "error reading response body!: " + err.Error())
-			log.Fatalf("error reading response body!: %s", err)
+			log.Printf("error reading response body!: %s", err)
+			return
 		}
 
 		var serverInfo ServerInfo
 		err = json.Unmarshal(body, &serverInfo)
 		if err != nil {
 			s.ChannelMessageSend(m.ChannelID, "error unmarshaling response body!: " + err.Error())
-			log.Fatalf("error unmarshaling response body!: %s", err)
+			log.Printf("error unmarshaling response body!: %s", err)
+			return
 		}
 		fmt.Println("serverInfo: ", serverInfo)
 		

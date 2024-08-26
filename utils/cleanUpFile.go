@@ -8,7 +8,8 @@ import (
 func CleanUpFile(filepath string) {
 	err := os.Remove(filepath)
 	if err != nil {
-		log.Fatalf("error deleting file!: %s", err)
+		log.Printf("error deleting file!: %s", err)
+		return
 	} else {
 		log.Printf("successfully deleted file: %s\n", filepath)	
 	}
