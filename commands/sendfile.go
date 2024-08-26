@@ -10,6 +10,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+// TODO: add a timeout and maybe also a filesize limit
+// filesize limit ref: https://discord.com/developers/docs/reference#uploading-files
 func HandleSendFileCommand(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string, filepath string) {
 	fmt.Printf("trying to send file: %s\n", filepath)
 	file, err := os.Open(filepath);
