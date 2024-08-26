@@ -3,7 +3,6 @@
 package utils
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -15,8 +14,6 @@ func SanitizeFileName(filename string) string {
 	if strings.Contains(filename, "#") {
 		filename = strings.Split(filename, "#")[0]
 	}
-
-	fmt.Println("cleaned filename: ", filename)
 	
 	return filename
 }

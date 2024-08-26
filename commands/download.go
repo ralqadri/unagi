@@ -33,7 +33,7 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 		
 		// getting the download link from the message content
 		downloadLink := strings.Trim(content, prefix + "dl")
-		log.Printf("starting to download: %s", downloadLink)
+		log.Printf("\nstarting to download: %s", downloadLink)
 
 		// preparing the json for the request body
 		reqBody := RequestBody{
@@ -95,7 +95,7 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			defer outRes.Body.Close()
 
 			filename := utils.SanitizeFileName(path.Base(resBody.Url))
-			fmt.Printf("returned filename: %s\n", filename)
+			log.Printf("returned filename: %s\n", filename)
 
 			filepath := fmt.Sprintf("%s/%s", "./downloads", filename)
 			out, err := os.Create(filepath)

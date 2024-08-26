@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -11,7 +10,7 @@ import (
 // TODO: failsafes; add a timeout and maybe also a filesize limit
 // filesize limit ref: https://discord.com/developers/docs/reference#uploading-files
 func SendFileToChannel(s *discordgo.Session, m *discordgo.MessageCreate, prefix string, content string, filepath string, filename string) {
-	fmt.Printf("trying to send file: %s\n", filepath)
+	log.Printf("trying to send file: %s\n", filepath)
 	file, err := os.Open(filepath);
 	
 	if err != nil {
@@ -25,7 +24,7 @@ func SendFileToChannel(s *discordgo.Session, m *discordgo.MessageCreate, prefix 
 		s.ChannelMessageSend(m.ChannelID, "error sending file!: " + err.Error())
 		log.Fatalf("error sending file!: %s", err)
 	} else {
-		fmt.Printf("successfully sent file: %s\n", filepath)
+		log.Printf("successfully sent file: %s\n", filepath)
 	}
 
 	err = os.Remove(filepath)
@@ -33,6 +32,6 @@ func SendFileToChannel(s *discordgo.Session, m *discordgo.MessageCreate, prefix 
 		s.ChannelMessageSend(m.ChannelID, "error deleting file!: " + err.Error())
 		log.Fatalf("error deleting file!: %s", err)
 	} else {
-		fmt.Printf("successfully deleted file: %s\n", filepath)	
+		log.Printf("successfully deleted file: %s\n", filepath)	
 	}
 }
