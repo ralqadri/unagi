@@ -26,13 +26,12 @@ type ResponseBody struct {
 
 // https://www.practical-go-lessons.com/post/go-how-to-send-post-http-requests-with-a-json-body-cbhvuqa220ds70kp2lkg
 
+// TODO: just fuckin move this to tools or something
 // func sanitizeFileName(filename string) string {
 // 	ext := path.Ext(filename)
 // 	if ext == "" {
 // 		return filename
 // 	}
-
-// 	// TODO: continue removing query parameters
 
 // 	// return ogName + ext // return ogName with the extension only
 // }
@@ -94,12 +93,7 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			log.Fatalf("error unmarshaling response body!: %s", err)
 		}
 
-		// log.Printf("resBody: %s", resBody)
-
 		if resBody.Status == "success" || resBody.Status == "redirect" || resBody.Status == "stream" {
-			// grab url here later and fetch it
-			// maybe i should probably move this to another file but whatever
-			// s.ChannelMessageSend(m.ChannelID, resBody.Url)
 
 			outRes, err := http.Get(resBody.Url)
 			if err != nil {
@@ -108,12 +102,6 @@ func HandleDownloadCommand(s *discordgo.Session, m *discordgo.MessageCreate, pre
 			}
 			defer outRes.Body.Close()
 
-			// TODO: this shit
-			// filename := path.Base(resBody.Url)
-			// if filename == "" {
-			// 	filename = "file.mp4"
-			// }
-			
 			// TODO: this shit
 			// filename = sanitizeFileName(filename)
 
