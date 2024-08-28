@@ -36,3 +36,6 @@ downloads/
 example*
 
 *Zone.Identifier
+
+*.bak
+*.part
