@@ -44,6 +44,21 @@ var (
 			Name: "ping",
 			Description: "Send a ping message",
 		},
+		{
+			Name: "echo",
+			Description: "Echoes/repeats a message back to the user",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:			discordgo.ApplicationCommandOptionString,
+					Name:			"message",
+					Description: 	"Message or text to echo back",
+					Required:		true,
+				},
+			},
+		},
+		{
+
+		},
 	}
 
 	commandHandlers = map[string]func (s *discordgo.Session, i *discordgo.InteractionCreate){
@@ -51,7 +66,15 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "pong!",
+					Content: "Pong!",
+				},
+			})
+		},
+		"echo": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: i.ApplicationCommandData().Options[0].StringValue(),
 				},
 			})
 		},
