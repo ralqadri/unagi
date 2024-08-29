@@ -6,6 +6,7 @@ import (
 	"os/signal"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/ralqadri/unagi/cmd"
 	"github.com/ralqadri/unagi/config"
 )
 
@@ -41,35 +42,29 @@ var (
 	// list of slash commands
 	commands = []*discordgo.ApplicationCommand{
 		{
+			Name: "pong",
+			Description: "Send a pong message",
+		},
+		{
 			Name: "ping",
 			Description: "Send a ping message",
 		},
 		{
 			Name: "echo",
-			Description: "Echoes/repeats a message back to the user",
+			Description: "Echoes a message",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Type:			discordgo.ApplicationCommandOptionString,
 					Name:			"message",
-					Description: 	"Message or text to echo back",
+					Description: 	"Message to echo back",
 					Required:		true,
 				},
 			},
 		},
-		{
-
-		},
 	}
 
 	commandHandlers = map[string]func (s *discordgo.Session, i *discordgo.InteractionCreate){
-		"ping": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: "Pong!",
-				},
-			})
-		},
+		"ping": cmd.PingCommand,
 		"echo": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
