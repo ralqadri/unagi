@@ -13,9 +13,9 @@ import (
 // user-defined variables/parameters; configs/tokens whatever
 // TODO: add option to add guildID in either config file or env var or flag
 var (
-	BotConfig 			*config.Config
-	GuildID				string 				= ""
-	RemoveCommands		bool				= true
+	BotConfig      *config.Config
+	GuildID        string = ""
+	RemoveCommands bool   = true
 )
 
 // init: read the config file (grab bot tokens/prefixes/configs etc.)
@@ -40,44 +40,67 @@ func init() {
 
 // list of slash commands
 var (
+	integerOptionMinValue = 1.0
+
 	commands = []*discordgo.ApplicationCommand{
 		{
-			Name: "ping",
+			Name:        "ping",
 			Description: "Send a ping message",
 		},
 		{
-			Name: "echo",
+			Name:        "echo",
 			Description: "Echoes your message",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
-					Type:			discordgo.ApplicationCommandOptionString,
-					Name:			"message",
-					Description: 	"Message to echo back",
-					Required:		true,
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "message",
+					Description: "Message to echo back",
+					Required:    true,
 				},
 			},
 		},
 		{
-			Name: "serverinfo",
+			Name:        "serverinfo",
 			Description: "Get server info for cobalt's API",
+		},
+		{
+			Name:        "download",
+			Description: "Download media using cobalt",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "url",
+					Description: "URL of media to download",
+					Required:    true,
+				},
+				{
+					Type:        discordgo.ApplicationCommandOptionInteger,
+					Name:        "index",
+					Description: "Index of the media to download",
+					Required:    false,
+					MinValue:    &integerOptionMinValue, // omegalul
+					MaxValue:    20,
+				},
+			},
 		},
 	}
 
-	commandHandlers = map[string]func (s *discordgo.Session, i *discordgo.InteractionCreate){
-		"ping": cmd.PingHandler,
-		"echo": cmd.EchoHandler,
+	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
+		"ping":       cmd.PingHandler,
+		"echo":       cmd.EchoHandler,
 		"serverinfo": cmd.ServerInfoHandler,
+		"download":   cmd.DownloadMediaHandler,
 	}
 )
 
 // init: register slash commands/add command handlers
 func init() {
-	s.AddHandler(func (s *discordgo.Session, i *discordgo.InteractionCreate) {
+	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		// get the command name; look up the command handler for it; execute it
 		if h, ok := commandHandlers[i.ApplicationCommandData().Name]; ok {
 			h(s, i)
 		}
-	}) 
+	})
 }
 
 func main() {
@@ -111,7 +134,7 @@ func main() {
 	if RemoveCommands {
 		log.Println("Removing commands...")
 
-		for _, v := range registeredCommands {	
+		for _, v := range registeredCommands {
 			err := s.ApplicationCommandDelete(s.State.User.ID, GuildID, v.ID)
 			if err != nil {
 				log.Panicf("Cannot delete '%v' command: %v", v.Name, err)
