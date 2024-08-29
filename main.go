@@ -76,7 +76,7 @@ var (
 				{
 					Type:        discordgo.ApplicationCommandOptionInteger,
 					Name:        "index",
-					Description: "Index of the media to download",
+					Description: "Index of the media to download (for IG/TT slideshows)",
 					Required:    false,
 					MinValue:    &integerOptionMinValue, // omegalul
 					MaxValue:    20,

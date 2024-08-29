@@ -10,8 +10,9 @@ import (
 
 func DownloadMediaHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	downloadMedia := gobalt.CreateDefaultSettings()
-
 	downloadMedia.Url = i.ApplicationCommandData().Options[0].StringValue()
+
+	var returnedContent string
 
 	destination, err := gobalt.Run(downloadMedia)
 	if err != nil {
@@ -39,10 +40,9 @@ func DownloadMediaHandler(s *discordgo.Session, i *discordgo.InteractionCreate) 
 	}
 
 	// TODO: Refactor this to use SelectMenu component instead... but it's a fucking pain in the ass
+	// This implementation is a compromise for now
 	if destination.Status == "picker" {
 		carouselIndex := i.ApplicationCommandData().Options[1].IntValue() - 1
-
-		log.Printf("Link is a `%v`: %v // Index picked is %v", destination.Status, destination.Text, carouselIndex)
 
 		if int(carouselIndex) > len(destination.URLs) || int(carouselIndex) < 0 {
 			log.Printf("Index out of bounds! Index picked is %v", carouselIndex)
@@ -56,18 +56,18 @@ func DownloadMediaHandler(s *discordgo.Session, i *discordgo.InteractionCreate) 
 			return
 		}
 
-		s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: destination.URLs[carouselIndex],
-			},
-		})
+		returnedContent = destination.URLs[carouselIndex]
+	}
+
+	if destination.Status == "success" || destination.Status == "stream" || destination.Status == "redirect" {
+		returnedContent = destination.URL
 	}
 
 	s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: destination.URL,
+			Content: returnedContent,
 		},
 	})
+
 }
