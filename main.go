@@ -47,7 +47,7 @@ var (
 		},
 		{
 			Name: "echo",
-			Description: "Echoes a message",
+			Description: "Echoes your message",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Type:			discordgo.ApplicationCommandOptionString,
@@ -57,11 +57,16 @@ var (
 				},
 			},
 		},
+		{
+			Name: "serverinfo",
+			Description: "Get server info for cobalt's API",
+		},
 	}
 
 	commandHandlers = map[string]func (s *discordgo.Session, i *discordgo.InteractionCreate){
 		"ping": cmd.PingHandler,
 		"echo": cmd.EchoHandler,
+		"serverinfo": cmd.ServerInfoHandler,
 	}
 )
 
