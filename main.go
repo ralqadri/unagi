@@ -38,13 +38,9 @@ func init() {
 	}
 }
 
+// list of slash commands
 var (
-	// list of slash commands
 	commands = []*discordgo.ApplicationCommand{
-		{
-			Name: "pong",
-			Description: "Send a pong message",
-		},
 		{
 			Name: "ping",
 			Description: "Send a ping message",
@@ -64,15 +60,8 @@ var (
 	}
 
 	commandHandlers = map[string]func (s *discordgo.Session, i *discordgo.InteractionCreate){
-		"ping": cmd.PingCommand,
-		"echo": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: i.ApplicationCommandData().Options[0].StringValue(),
-				},
-			})
-		},
+		"ping": cmd.PingHandler,
+		"echo": cmd.EchoHandler,
 	}
 )
 
