@@ -5,7 +5,7 @@ Video downloader Discord bot based on Go, using [cobalt's api](https://github.co
 ## To-do
 
 - [x] Use [gobalt](https://github.com/lostdusty/gobalt) instead
-- [ ] File downloading failsafe
+- [ ] File downloading failsafes
   - [x] Size requirements (max 25MB)
   - [ ] Time outs
 - [ ] Cron job for deleting downloaded files
