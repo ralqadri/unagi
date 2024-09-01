@@ -10,5 +10,5 @@ Video downloader Discord bot based on Go, using [cobalt's api](https://github.co
   - [ ] **Time outs**
 - [ ] **Token stashing method**
 - [ ] Cron job for deleting downloaded files
-- [ ] A better way to fetch the title of the `redirect`/`stream` files
-- [ ] Allow users to set cobalt video downlaoding setting parameters instead of using the default ones everytime 
+- [x] A better way to fetch the title of the `redirect`/`stream` files (note: apparently this shit works now but not for redirect i guess)
+- [ ] Allow users to set cobalt video downlaoding setting parameters instead of using the default ones everytime
