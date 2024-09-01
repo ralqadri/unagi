@@ -82,7 +82,6 @@ func DownloadMediaHandler(s *discordgo.Session, i *discordgo.InteractionCreate) 
 			return
 		}
 
-		// returnedUrl = destination.URLs[carouselIndex]
 	}
 
 	// TODO: Change this shit to followup messages
@@ -130,7 +129,6 @@ func DownloadMediaHandler(s *discordgo.Session, i *discordgo.InteractionCreate) 
 			return
 		}
 
-		// TODO: Change to a constant
 		if fileInfo.Size() > FilesizeLimit {
 			log.Printf("File `%v` is too big to send! (Max file size is 25MB)", filename)
 
