@@ -9,6 +9,17 @@ import (
 )
 
 func ServerInfoHandler(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	// Recover from panic if anything fails; https://golang-id.org/blog/defer-panic-and-recover/
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Recovering from panic in `DownloadMediaHandler`: %v", r)
+			content := "Unexpected error while processing your request! Maybe try again? (Panic on ServerInfoHandler)"
+			s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
+				Content: &content,
+			})
+		}
+	}()
+
 	server, err := gobalt.CobaltServerInfo(gobalt.CobaltApi)
 
 	if err != nil {
