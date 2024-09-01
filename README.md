@@ -1,14 +1,12 @@
 # unagi
 
-video downloader discord bot based on go, using [cobalt's api](https://github.com/imputnet/cobalt)
+Video downloader Discord bot based on Go, using [cobalt's api](https://github.com/imputnet/cobalt)
 
-this was made just to save memes on my personal discord channel/my phone
+## To-do
 
-## todo
-
-- [ ] file downloading failsafes
-  - [x] file size requirements (max 25MB)
-  - [ ] time outs
-- [ ] maybe switch to a cron job for deleting downloaded files since deleting files can fail on download.go rn
-- [ ] a better way to fetch the title of the stream (and potentially for stuff that are also "success" and "redirect" responses)
-- [ ] use [gobalt](https://github.com/lostdusty/gobalt) instead to provide a cleaner way to use the cobalt api
+- [x] Use [gobalt](https://github.com/lostdusty/gobalt) instead
+- [ ] File downloading failsafe
+  - [x] Size requirements (max 25MB)
+  - [ ] Time outs
+- [ ] Cron job for deleting downloaded files
+- [ ] A better way to fetch the title of the `redirect`/`stream` files
