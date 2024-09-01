@@ -3,6 +3,7 @@ module github.com/ralqadri/unagi
 go 1.23.0
 
 require github.com/bwmarrin/discordgo v0.28.1 // direct
+require github.com/lostdusty/gobalt v1.0.8 // direct
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect
